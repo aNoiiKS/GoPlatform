@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Go Platform — Teach Go, Online</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f0f0f;--bg2:#181818;--bg3:#222;--bg4:#2a2a2a;
+  --border:#2e2e2e;--border2:#3a3a3a;
+  --text:#e8e8e8;--text2:#aaa;--text3:#555;
+  --accent:#d4a84b;--accent2:#e8c06a;
+  --green:#4caf50;--blue:#4a9eff;--red:#e05252;--purple:#9c6fe0;
+  --radius:12px;--radius2:8px;
+  --eb-h:44px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* ── Early Bird Banner ── */
+.eb-banner{position:fixed;top:0;left:0;right:0;z-index:200;height:var(--eb-h);
+           background:linear-gradient(90deg,rgba(212,168,75,.18) 0%,rgba(212,168,75,.08) 50%,rgba(74,158,255,.1) 100%);
+           border-bottom:1px solid rgba(212,168,75,.35);
+           display:flex;align-items:center;justify-content:center;gap:14px;
+           padding:0 48px;font-size:12px;flex-wrap:wrap}
+.eb-banner .eb-text{color:var(--text2)}
+.eb-banner .eb-text strong{color:var(--accent)}
+.eb-cta{background:var(--accent);color:#111;padding:5px 14px;border-radius:5px;
+        font-size:11px;font-weight:700;text-decoration:none;white-space:nowrap;
+        transition:opacity .2s}
+.eb-cta:hover{opacity:.85}
+.eb-close{position:absolute;right:14px;top:50%;transform:translateY(-50%);
+          background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;
+          line-height:1;padding:4px}
+.eb-close:hover{color:var(--text)}
+
+/* ── Coming soon toast ── */
+.cs-toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);
+          background:#12182e;border:1px solid rgba(74,158,255,.45);color:var(--blue);
+          padding:11px 22px;border-radius:8px;font-size:13px;font-weight:600;
+          z-index:999;display:none;box-shadow:0 6px 24px rgba(0,0,0,.6);
+          white-space:nowrap;letter-spacing:.01em}
+
+/* ── Nav ── */
+nav{position:fixed;top:var(--eb-h);left:0;right:0;z-index:100;
+    background:rgba(15,15,15,.92);backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border);
+    height:60px;display:flex;align-items:center;padding:0 32px;gap:32px;
+    transition:top .2s}
+nav.no-banner{top:0}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.nav-logo span{font-size:18px;font-weight:800;color:var(--accent);letter-spacing:-.02em}
+.nav-links{display:flex;gap:24px;margin-left:auto}
+.nav-links a{color:var(--text2);text-decoration:none;font-size:13px;transition:color .2s}
+.nav-links a:hover{color:var(--accent)}
+.nav-cta{background:var(--accent);color:#111;padding:7px 18px;border-radius:6px;
+         font-size:13px;font-weight:700;text-decoration:none;transition:opacity .2s;white-space:nowrap}
+.nav-cta:hover{opacity:.85}
+
+/* ── Hero ── */
+.hero{min-height:100vh;display:flex;align-items:center;padding:calc(var(--eb-h) + 80px) 32px 60px;
+      max-width:1200px;margin:0 auto;gap:60px}
+.hero-left{flex:1;min-width:0}
+.hero-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(212,168,75,.1);
+          border:1px solid rgba(212,168,75,.3);border-radius:20px;
+          padding:5px 14px;font-size:11px;color:var(--accent);font-weight:600;
+          letter-spacing:.06em;text-transform:uppercase;margin-bottom:24px}
+.hero-tag::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);
+                  animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+.hero h1{font-size:clamp(38px,5vw,64px);font-weight:800;line-height:1.05;
+         letter-spacing:-.03em;margin-bottom:20px}
+.hero h1 .accent{color:var(--accent)}
+.hero-sub{font-size:clamp(15px,2vw,18px);color:var(--text2);line-height:1.6;
+          max-width:480px;margin-bottom:36px}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap}
+.btn-primary{background:var(--accent);color:#111;padding:12px 28px;border-radius:8px;
+             font-size:14px;font-weight:700;text-decoration:none;transition:all .2s;
+             display:inline-flex;align-items:center;gap:8px}
+.btn-primary:hover{background:var(--accent2);transform:translateY(-1px)}
+.btn-secondary{background:transparent;color:var(--text);padding:12px 28px;border-radius:8px;
+               font-size:14px;font-weight:600;text-decoration:none;border:1px solid var(--border2);
+               transition:all .2s;display:inline-flex;align-items:center;gap:8px}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-1px)}
+.hero-right{flex-shrink:0;display:flex;align-items:center;justify-content:center}
+#hero-canvas{border-radius:16px;border:1px solid var(--border2);
+             box-shadow:0 0 60px rgba(212,168,75,.15),0 20px 60px rgba(0,0,0,.5)}
+
+/* ── Stats bar ── */
+.stats-bar{border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+           background:var(--bg2);padding:20px 32px;
+           display:flex;justify-content:center;gap:60px;flex-wrap:wrap}
+.stat{text-align:center}
+.stat-num{font-size:28px;font-weight:800;color:var(--accent)}
+.stat-lbl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+
+/* ── Section commons ── */
+section{padding:80px 32px;max-width:1200px;margin:0 auto}
+.section-tag{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);
+             font-weight:700;margin-bottom:12px}
+.section-title{font-size:clamp(26px,4vw,40px);font-weight:800;letter-spacing:-.02em;
+               margin-bottom:14px;line-height:1.1}
+.section-sub{font-size:15px;color:var(--text2);line-height:1.6;max-width:560px;margin-bottom:48px}
+
+/* ── Feature tabs ── */
+.tabs{display:flex;gap:4px;background:var(--bg3);border-radius:10px;padding:4px;
+      width:fit-content;margin-bottom:40px;border:1px solid var(--border)}
+.tab{padding:8px 20px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;
+     color:var(--text2);border:none;background:transparent;transition:all .2s}
+.tab.active{background:var(--accent);color:#111}
+
+/* ── Feature cards ── */
+.feat-panel{display:none}
+.feat-panel.active{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.feat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
+           padding:20px;cursor:default;transition:all .25s;position:relative;overflow:visible}
+.feat-card::before{content:'';position:absolute;inset:0;border-radius:var(--radius);
+                   background:linear-gradient(135deg,rgba(212,168,75,.05) 0%,transparent 60%);
+                   opacity:0;transition:opacity .3s;pointer-events:none}
+.feat-card:hover{border-color:var(--accent);transform:translateY(-3px);
+                 box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.feat-card:hover::before{opacity:1}
+.feat-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;
+           justify-content:center;font-size:22px;margin-bottom:14px;flex-shrink:0}
+.feat-card h3{font-size:14px;font-weight:700;margin-bottom:7px;color:var(--text);
+              display:flex;align-items:center;gap:6px}
+.feat-card p{font-size:12px;color:var(--text2);line-height:1.6}
+.feat-badge{display:inline-block;font-size:9px;font-weight:700;text-transform:uppercase;
+            letter-spacing:.06em;padding:2px 8px;border-radius:10px;margin-top:10px}
+.badge-live{background:rgba(76,175,80,.15);color:var(--green);border:1px solid rgba(76,175,80,.3)}
+.badge-new{background:rgba(74,158,255,.15);color:var(--blue);border:1px solid rgba(74,158,255,.3)}
+.feat-plus{background:none;border:1px solid var(--border2);color:var(--text3);
+           border-radius:50%;width:20px;height:20px;font-size:13px;cursor:pointer;
+           display:inline-flex;align-items:center;justify-content:center;
+           transition:all .2s;flex-shrink:0;line-height:1;margin-left:auto}
+.feat-plus:hover{border-color:var(--accent);color:var(--accent);background:rgba(212,168,75,.08)}
+
+/* ── Feature Detail Modal ── */
+.dm-bg{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:500;
+       display:none;align-items:center;justify-content:center;padding:20px}
+.dm-bg.open{display:flex}
+.dm-box{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);
+        padding:28px 30px;width:100%;max-width:520px;max-height:88vh;overflow-y:auto;
+        position:relative}
+.dm-box h2{font-size:20px;font-weight:800;margin-bottom:6px;margin-right:28px;
+           display:flex;align-items:center;gap:10px}
+.dm-icon{font-size:26px}
+.dm-close{position:absolute;top:14px;right:16px;background:none;border:none;
+          color:var(--text3);cursor:pointer;font-size:20px;line-height:1}
+.dm-close:hover{color:var(--text)}
+.dm-desc{font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.6;
+         padding-bottom:14px;border-bottom:1px solid var(--border)}
+.dm-points{list-style:none;display:flex;flex-direction:column;gap:10px}
+.dm-points li{display:flex;align-items:flex-start;gap:10px;font-size:13px;line-height:1.55}
+.dm-points li::before{content:'✦';color:var(--accent);font-size:10px;flex-shrink:0;margin-top:2px}
+.dm-badge{display:inline-block;margin-top:16px;font-size:10px;font-weight:700;
+          text-transform:uppercase;letter-spacing:.06em;padding:3px 10px;border-radius:10px}
+
+/* ── Usage Paths ── */
+.usage-wrap{background:var(--bg2);border-top:1px solid var(--border);
+            border-bottom:1px solid var(--border);padding:80px 32px}
+.usage-inner{max-width:1200px;margin:0 auto}
+.usage-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:48px}
+.usage-card{background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);
+            padding:32px;transition:all .25s;position:relative;overflow:hidden}
+.usage-card::after{content:'';position:absolute;inset:0;border-radius:var(--radius);
+                   opacity:0;transition:opacity .3s;pointer-events:none}
+.usage-card.u-teacher{border-left:3px solid var(--accent)}
+.usage-card.u-teacher::after{background:linear-gradient(135deg,rgba(212,168,75,.04) 0%,transparent 70%)}
+.usage-card.u-api{border-left:3px solid var(--blue)}
+.usage-card.u-api::after{background:linear-gradient(135deg,rgba(74,158,255,.04) 0%,transparent 70%)}
+.usage-card:hover::after{opacity:1}
+.usage-card:hover{transform:translateY(-3px);box-shadow:0 8px 32px rgba(0,0,0,.3)}
+.usage-head{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.usage-ico{font-size:32px}
+.usage-head h3{font-size:20px;font-weight:800;color:var(--text)}
+.usage-head .usage-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;
+                        padding:2px 9px;border-radius:10px;margin-top:2px}
+.lbl-teacher{background:rgba(212,168,75,.12);color:var(--accent);border:1px solid rgba(212,168,75,.25)}
+.lbl-api{background:rgba(74,158,255,.12);color:var(--blue);border:1px solid rgba(74,158,255,.25)}
+.usage-card p{font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:18px}
+.usage-list{list-style:none;display:flex;flex-direction:column;gap:7px;margin-bottom:22px}
+.usage-list li{font-size:12px;color:var(--text2);display:flex;align-items:flex-start;gap:8px}
+.usage-list li::before{content:'→';color:var(--accent);flex-shrink:0}
+.u-api .usage-list li::before{color:var(--blue)}
+.usage-link{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;
+            text-decoration:none;padding:8px 18px;border-radius:6px;transition:all .2s}
+.usage-link-accent{background:rgba(212,168,75,.12);color:var(--accent);border:1px solid rgba(212,168,75,.25)}
+.usage-link-accent:hover{background:rgba(212,168,75,.22)}
+.usage-link-blue{background:rgba(74,158,255,.12);color:var(--blue);border:1px solid rgba(74,158,255,.25)}
+.usage-link-blue:hover{background:rgba(74,158,255,.22)}
+
+/* ── API Showcase ── */
+.api-wrap{background:linear-gradient(135deg,#0f0f12 0%,#0d1520 100%);
+          border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+          padding:80px 32px}
+.api-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.api-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px}
+.api-chip{background:var(--bg3);border:1px solid var(--border2);border-radius:6px;
+          padding:7px 14px;font-size:12px;color:var(--text2);display:flex;align-items:center;gap:7px}
+.api-chip .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.dot-get{background:var(--green)}
+.dot-post{background:var(--blue)}
+.dot-del{background:var(--red)}
+.api-preview{background:var(--bg);border:1px solid var(--border2);border-radius:10px;
+             overflow:hidden}
+.api-preview-bar{background:var(--bg3);padding:9px 14px;display:flex;align-items:center;gap:8px;
+                 border-bottom:1px solid var(--border)}
+.api-preview-bar span{font-size:10px;color:var(--text3)}
+.api-preview-bar .m-get{color:var(--green);font-weight:700;font-family:monospace;font-size:11px}
+.api-preview pre{padding:16px;font-family:'Courier New',monospace;font-size:12px;
+                 color:var(--text);line-height:1.7;overflow-x:auto}
+.api-preview pre .k{color:var(--accent)}
+.api-preview pre .s{color:var(--green)}
+.api-preview pre .n{color:var(--blue)}
+.section-link{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:700;
+              color:var(--blue);text-decoration:none;padding:9px 20px;border-radius:7px;
+              background:rgba(74,158,255,.1);border:1px solid rgba(74,158,255,.25);transition:all .2s}
+.section-link:hover{background:rgba(74,158,255,.18)}
+
+/* ── How it works ── */
+.hiw-wrap{background:var(--bg);padding:80px 32px}
+.hiw-inner{max-width:1200px;margin:0 auto}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:48px;position:relative}
+.steps::before{content:'';position:absolute;top:32px;left:calc(16.66% + 20px);
+               right:calc(16.66% + 20px);height:1px;background:var(--border2);z-index:0}
+.step{text-align:center;position:relative;z-index:1}
+.step-num{width:64px;height:64px;border-radius:50%;background:var(--bg3);border:2px solid var(--border2);
+          display:flex;align-items:center;justify-content:center;font-size:22px;
+          margin:0 auto 20px;transition:all .3s}
+.step:hover .step-num{border-color:var(--accent);background:rgba(212,168,75,.1)}
+.step h3{font-size:15px;font-weight:700;margin-bottom:8px}
+.step p{font-size:13px;color:var(--text2);line-height:1.6}
+
+/* ── Platforms ── */
+.platforms-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.plat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
+           padding:28px 24px;transition:all .25s;position:relative;overflow:hidden}
+.plat-card:hover{border-color:var(--accent);transform:translateY(-3px)}
+.plat-icon{font-size:36px;margin-bottom:16px}
+.plat-card h3{font-size:17px;font-weight:800;margin-bottom:10px;color:var(--accent)}
+.plat-card p{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:16px}
+.plat-tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+          padding:3px 10px;border-radius:10px;background:rgba(212,168,75,.1);
+          color:var(--accent);border:1px solid rgba(212,168,75,.2);width:fit-content}
+
+/* ── Changelog ── */
+.changelog-wrap{background:var(--bg2);border-top:1px solid var(--border);padding:80px 32px}
+.changelog-inner{max-width:1200px;margin:0 auto}
+.cl-list{margin-top:40px;display:flex;flex-direction:column;gap:0;position:relative;padding-left:28px}
+.cl-list::before{content:'';position:absolute;left:9px;top:10px;bottom:10px;
+                 width:1px;background:var(--border2)}
+.cl-item{position:relative;padding-bottom:32px}
+.cl-item:last-child{padding-bottom:0}
+.cl-dot{position:absolute;left:-28px;top:4px;width:18px;height:18px;border-radius:50%;
+        border:2px solid var(--border2);background:var(--bg3);
+        display:flex;align-items:center;justify-content:center;z-index:1}
+.cl-dot.active{border-color:var(--accent);background:rgba(212,168,75,.15)}
+.cl-dot.wip{border-color:var(--blue);background:rgba(74,158,255,.1)}
+.cl-dot.planned{border-color:var(--border2);background:var(--bg)}
+.cl-date{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;
+         margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.cl-title{font-size:15px;font-weight:700;margin-bottom:5px;color:var(--text)}
+.cl-desc{font-size:13px;color:var(--text2);line-height:1.6;max-width:560px}
+.cl-tag{display:inline-block;font-size:9px;font-weight:700;text-transform:uppercase;
+        letter-spacing:.06em;padding:2px 8px;border-radius:10px;margin-left:6px}
+.cl-tag-done{background:rgba(76,175,80,.12);color:var(--green);border:1px solid rgba(76,175,80,.25)}
+.cl-tag-wip{background:rgba(74,158,255,.12);color:var(--blue);border:1px solid rgba(74,158,255,.25)}
+.cl-tag-planned{background:var(--bg3);color:var(--text3);border:1px solid var(--border2)}
+
+/* ── Sustainability ── */
+.sustain-wrap{background:var(--bg);border-top:1px solid var(--border);padding:80px 32px}
+.sustain-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start}
+.sustain-pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.s-pill{background:var(--bg2);border:1px solid var(--border2);border-radius:6px;
+        padding:7px 14px;font-size:12px;color:var(--text2);display:flex;align-items:center;gap:6px}
+.s-pill-icon{font-size:16px}
+.sustain-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.s-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);
+        padding:18px;transition:all .25s}
+.s-card:hover{border-color:rgba(212,168,75,.3);transform:translateY(-2px)}
+.s-card-icon{font-size:24px;margin-bottom:10px}
+.s-card h4{font-size:13px;font-weight:700;margin-bottom:6px}
+.s-card p{font-size:11px;color:var(--text2);line-height:1.5}
+
+/* ── Footer ── */
+footer{border-top:1px solid var(--border);background:var(--bg2);padding:40px 32px;
+       display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.footer-logo{font-size:16px;font-weight:800;color:var(--accent)}
+.footer-links{display:flex;gap:20px}
+.footer-links a{color:var(--text3);text-decoration:none;font-size:12px;transition:color .2s}
+.footer-links a:hover{color:var(--accent)}
+.footer-copy{font-size:11px;color:var(--text3)}
+
+/* ── Animations ── */
+.fade-up{opacity:0;transform:translateY(30px);transition:opacity .6s ease,transform .6s ease}
+.fade-up.visible{opacity:1;transform:translateY(0)}
+
+/* ── Responsive ── */
+@media(max-width:900px){
+  .hero{flex-direction:column;padding-top:calc(var(--eb-h) + 100px);text-align:center}
+  .hero-sub{margin:0 auto 36px}
+  .hero-btns{justify-content:center}
+  #hero-canvas{width:280px!important;height:280px!important}
+  .steps{grid-template-columns:1fr}
+  .steps::before{display:none}
+  .platforms-grid{grid-template-columns:1fr}
+  .usage-grid{grid-template-columns:1fr}
+  .api-inner{grid-template-columns:1fr}
+  .sustain-inner{grid-template-columns:1fr}
+  .sustain-cards{grid-template-columns:1fr 1fr}
+  .stats-bar{gap:30px}
+  nav{padding:0 16px;gap:16px}
+  .nav-links{display:none}
+  .eb-banner{font-size:11px;padding:0 36px}
+}
+@media(max-width:600px){
+  section{padding:60px 16px}
+  .sustain-cards{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ── Early Bird Banner ────────────────────────────────────────────────────── -->
+<div id="early-banner" class="eb-banner">
+  <span class="eb-text">🎯 <strong>Early access open</strong> — Looking for <strong>5 teachers</strong> to test the platform · Updates from <strong>May 18</strong> · Public release <strong>June 1, 2026</strong></span>
+  <a class="eb-cta" href="#" onclick="comingSoon(event)">Volunteer as early tester →</a>
+  <button class="eb-close" onclick="dismissBanner()" title="Dismiss">✕</button>
+</div>
+
+<!-- ── Navigation ─────────────────────────────────────────────────────────── -->
+<nav id="main-nav">
+  <a class="nav-logo" href="#">
+    <span>&#9823; Go Platform</span>
+  </a>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#usage">For Teachers</a>
+    <a href="#api">API</a>
+    <a href="#platforms">Platforms</a>
+    <a href="#" onclick="comingSoon(event)">Sign in</a>
+  </div>
+  <a class="nav-cta" href="#" onclick="comingSoon(event)">Get Started →</a>
+</nav>
+
+<!-- ── Hero ───────────────────────────────────────────────────────────────── -->
+<div class="hero">
+  <div class="hero-left">
+    <div class="hero-tag">&#9679; Open Source &amp; Free Forever</div>
+    <h1>Teach Go.<br>The way it<br><span class="accent">deserves.</span></h1>
+    <p class="hero-sub">
+      A complete platform for Go teachers and their students —
+      live lessons, tsumego homework, tournaments, progress tracking, and a free REST API.
+      All in one place. On every device.
+    </p>
+    <div class="hero-btns">
+      <a class="btn-primary" href="#features">Explore Features →</a>
+      <a class="btn-secondary" href="#" onclick="comingSoon(event)">Get Started</a>
+    </div>
+  </div>
+  <div class="hero-right">
+    <canvas id="hero-canvas" width="380" height="380"></canvas>
+  </div>
+</div>
+
+<!-- ── Stats bar ──────────────────────────────────────────────────────────── -->
+<div class="stats-bar">
+  <div class="stat"><div class="stat-num">18+</div><div class="stat-lbl">Features available</div></div>
+  <div class="stat"><div class="stat-num">19</div><div class="stat-lbl">API endpoints</div></div>
+  <div class="stat"><div class="stat-num">∞</div><div class="stat-lbl">Students & teachers</div></div>
+  <div class="stat"><div class="stat-num">Free</div><div class="stat-lbl">Forever. No ads.</div></div>
+</div>
+
+<!-- ── Features ───────────────────────────────────────────────────────────── -->
+<section id="features">
+  <div class="section-tag">Features</div>
+  <h2 class="section-title">Everything in one place</h2>
+  <p class="section-sub">Built by Go enthusiasts, for Go teachers. Click the <strong style="color:var(--accent)">+</strong> on any card for a detailed breakdown.</p>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('teacher', this)">&#9823; For Teachers</button>
+    <button class="tab" onclick="switchTab('student', this)">&#9675; For Students</button>
+  </div>
+
+  <!-- Teacher features -->
+  <div class="feat-panel active" id="panel-teacher">
+
+    <div class="feat-card fade-up">
+      <div class="feat-icon" style="background:rgba(76,175,80,.1)">📡</div>
+      <h3>Live Lessons <button class="feat-plus" onclick="openDetail('t-lessons')">+</button></h3>
+      <p>Open a session and all your students join instantly. Everyone shares the same board in real time, with full annotation tools.</p>
+      <span class="feat-badge badge-live">Real-time</span>
+    </div>
+
+    <div class="feat-card fade-up">
+      <div class="feat-icon" style="background:rgba(212,168,75,.1)">✏️</div>
+      <h3>Board Annotations <button class="feat-plus" onclick="openDetail('t-annotations')">+</button></h3>
+      <p>6 marker types, a free-draw paint tool, move tree navigation, and full replay of any game — directly on the shared board.</p>
+    </div>
+
+    <div class="feat-card fade-up">
+      <div class="feat-icon" style="background:rgba(74,158,255,.1)">⚔️</div>
+      <h3>Live Games <button class="feat-plus" onclick="openDetail('t-games')">+</button></h3>
+      <p>Challenge a student to a real game directly inside a session — with configurable clock, ruleset, komi, and handicap.</p>
+      <span class="feat-badge badge-live">Real-time</span>
+    </div>
+
+    <div class="feat-card fade-up">
+      <div class="feat-icon" style="background:rgba(156,111,224,.1)">📊</div>
+      <h3>Instant Polls <button class="feat-plus" onclick="openDetail('t-polls')">+</button></h3>
+      <p>Launch a mid-lesson poll in seconds — "Where should Black play?", True/False, or custom questions. Optional timer and hidden results.</p>
+      <span class="feat-badge badge-live">Real-time</span>
+    </div>
+
+    <div class="feat-card fade-up">
+      <div class="feat-icon" style="background:rgba(212,168,75,.1)">⭕</div>
+      <h3>Tsumego Homework <button class="feat-plus" onclick="openDetail('t-tsumego')">+</button></h3>
+      <p>Browse thousands of SGF problems by level, build a custom assignment, send it to your student, and review their answers with notes and a grade.</p>
+    </div>
+
+    <div class="feat-card fade-up">
+      <div class="feat-icon" style="background:rgba(76,175,80,.1)">📚</div>
+      <h3>Written Lessons <button class="feat-plus" onclick="openDetail('t-courses')">+</button></h3>
+      <p>Create structured lessons with text, diagrams, and problems organized by category. Share with students and export to PDF.</p>
+    </div>
+
+    <div class="feat-card fade-up">
+      <div class="feat-icon" style="background:rgba(74,158,255,.1)">🏆</div>
+      <h3>Tournaments &amp; Leagues <button class="feat-plus" onclick="openDetail('t-tournaments')">+</button></h3>
+      <p>Organize McMahon or round-robin tournaments with automatic standings, SOS tiebreaker, and ELO tracking. Run full league seasons with groups.</p>
+      <span class="feat-badge badge-new">New</span>
+    </div>
+
+    <div class="feat-card fade-up">
+      <div class="feat-icon" style="background:rgba(212,168,75,.1)">👥</div>
+      <h3>Student Groups <button class="feat-plus" onclick="openDetail('t-groups')">+</button></h3>
+      <p>Organize your students into groups and launch collective sessions or group demonstrations in one click.</p>
+    </div>
+
+    <div class="feat-card fade-up">
+      <div class="feat-icon" style="background:rgba(76,175,80,.1)">📈</div>
+      <h3>Progress Tracking <button class="feat-plus" onclick="openDetail('t-progress')">+</button></h3>
+      <p>Monitor every student's evolution — ELO rating, tsumego scores, category breakdowns, and performance charts over time.</p>
+    </div>
+
+    <div class="feat-card fade-up">
+      <div class="feat-icon" style="background:rgba(156,111,224,.1)">📅</div>
+      <h3>Shared Calendar <button class="feat-plus" onclick="openDetail('t-calendar')">+</button></h3>
+      <p>Schedule lessons, manage your availability, and handle reschedule requests — all in a shared calendar your students can see.</p>
+    </div>
+
+    <div class="feat-card fade-up">
+      <div class="feat-icon" style="background:rgba(156,111,224,.1)">📋</div>
+      <h3>Group Homework &amp; Live <button class="feat-plus" onclick="openDetail('t-group-hw')">+</button></h3>
+      <p>Assign an exercise to your entire group at once. During a live session, watch student submissions arrive in real time — see who solved what, immediately.</p>
+      <span class="feat-badge" style="background:rgba(156,111,224,.15);color:var(--purple);border:1px solid rgba(156,111,224,.3)">Coming soon</span>
+    </div>
+
+  </div>
+
+  <!-- Student features -->
+  <div class="feat-panel" id="panel-student">
+
+    <div class="feat-card fade-up">
+      <div class="feat-icon" style="background:rgba(76,175,80,.1)">▶️</div>
+      <h3>Join a Lesson <button class="feat-plus" onclick="openDetail('s-join')">+</button></h3>
+      <p>Your teacher opens a session — you join with one click and see the board live. No installation, no setup.</p>
+      <span class="feat-badge badge-live">Real-time</span>
+    </div>
+
+    <div class="feat-card fade-up">
+      <div class="feat-icon" style="background:rgba(212,168,75,.1)">⭕</div>
+      <h3>Solve Tsumego <button class="feat-plus" onclick="openDetail('s-tsumego')">+</button></h3>
+      <p>Work through your assigned problems at your own pace. Navigate the solution step by step and mark each problem as found, missed, or difficult.</p>
+    </div>
+
+    <div class="feat-card fade-up">
+      <div class="feat-icon" style="background:rgba(74,158,255,.1)">📚</div>
+      <h3>Browse Lessons <button class="feat-plus" onclick="openDetail('s-courses')">+</button></h3>
+      <p>Access all the lessons your teacher has shared with you — organized by category, readable anytime, downloadable as PDF.</p>
+    </div>
+
+    <div class="feat-card fade-up">
+      <div class="feat-icon" style="background:rgba(76,175,80,.1)">📈</div>
+      <h3>Track Your ELO <button class="feat-plus" onclick="openDetail('s-elo')">+</button></h3>
+      <p>Watch your rating evolve over time. See your strengths and weaknesses by category, and follow your long-term progress.</p>
+    </div>
+
+    <div class="feat-card fade-up">
+      <div class="feat-icon" style="background:rgba(156,111,224,.1)">🏆</div>
+      <h3>Compete <button class="feat-plus" onclick="openDetail('s-compete')">+</button></h3>
+      <p>Participate in tournaments and leagues organized by your teacher. View standings, your game history, and ELO changes.</p>
+    </div>
+
+    <div class="feat-card fade-up">
+      <div class="feat-icon" style="background:rgba(212,168,75,.1)">🔔</div>
+      <h3>Live Notifications <button class="feat-plus" onclick="openDetail('s-notifs')">+</button></h3>
+      <p>Get notified instantly when your teacher starts a session, sends you an assignment, or challenges you to a game.</p>
+      <span class="feat-badge badge-live">Real-time</span>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── Usage Paths ─────────────────────────────────────────────────────────── -->
+<div class="usage-wrap" id="usage">
+  <div class="usage-inner">
+    <div class="section-tag">Two ways to use Go Platform</div>
+    <h2 class="section-title">For teachers. For organizations.</h2>
+    <p class="section-sub" style="margin-bottom:0">Whether you teach one student or integrate Go Platform into a school system — there is a path for you.</p>
+    <div class="usage-grid">
+
+      <div class="usage-card u-teacher fade-up">
+        <div class="usage-head">
+          <div class="usage-ico">&#9823;</div>
+          <div>
+            <h3>Direct Platform Use</h3>
+            <div class="usage-lbl lbl-teacher">For Teachers</div>
+          </div>
+        </div>
+        <p>Create a free account and start teaching immediately. All features are accessible from your browser — no server, no configuration, no cost.</p>
+        <ul class="usage-list">
+          <li>Create an account in under a minute</li>
+          <li>Add your students by email</li>
+          <li>Use every feature from day one</li>
+          <li>Students join with a simple registration link</li>
+          <li>Works on any modern browser</li>
+        </ul>
+        <a class="usage-link usage-link-accent" href="#" onclick="comingSoon(event)">Start teaching for free →</a>
+      </div>
+
+      <div class="usage-card u-api fade-up">
+        <div class="usage-head">
+          <div class="usage-ico">🔌</div>
+          <div>
+            <h3>REST API Integration</h3>
+            <div class="usage-lbl lbl-api">For Organizations</div>
+          </div>
+        </div>
+        <p>Connect Go Platform to your existing infrastructure — LMS, school portal, custom dashboard, or automation script. The API is completely free.</p>
+        <ul class="usage-list">
+          <li>19 documented endpoints</li>
+          <li>Read and write access via Bearer token</li>
+          <li>Query students, assignments, grades, sessions</li>
+          <li>Works with any language or platform</li>
+          <li>Generate your key in the teacher dashboard</li>
+        </ul>
+        <a class="usage-link usage-link-blue" href="#" onclick="comingSoon(event)">Read the API docs →</a>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ── REST API Showcase ───────────────────────────────────────────────────── -->
+<div class="api-wrap" id="api">
+  <div class="api-inner">
+    <div>
+      <div class="section-tag">REST API</div>
+      <h2 class="section-title" style="max-width:400px">Open API. Free. Forever.</h2>
+      <p style="font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:24px;max-width:420px">
+        Go Platform exposes a fully documented REST API so any tool can speak to it.
+        Integrate your existing school platform, build a custom dashboard, or automate assignments from a script.
+      </p>
+      <div class="api-chips">
+        <div class="api-chip"><span class="dot dot-get"></span>12 GET endpoints</div>
+        <div class="api-chip"><span class="dot dot-post"></span>4 POST endpoints</div>
+        <div class="api-chip"><span class="dot dot-del"></span>3 DELETE endpoints</div>
+        <div class="api-chip">🔑 Bearer token auth</div>
+        <div class="api-chip">📄 JSON responses</div>
+      </div>
+      <a class="section-link" href="#" onclick="comingSoon(event)" style="margin-top:8px">&#128196; View full documentation →</a>
+    </div>
+    <div>
+      <div class="api-preview fade-up">
+        <div class="api-preview-bar">
+          <span class="m-get">GET</span>
+          <span>/api/v1/students/2/progress</span>
+        </div>
+        <pre><span class="k">{</span>
+  <span class="s">"ok"</span>: <span class="n">true</span>,
+  <span class="s">"data"</span>: <span class="k">{</span>
+    <span class="s">"elo_history"</span>: [
+      <span class="k">{</span> <span class="s">"elo"</span>: <span class="n">1240</span>, <span class="s">"delta"</span>: <span class="n">+18</span> <span class="k">}</span>
+    ],
+    <span class="s">"category_scores"</span>: <span class="k">{</span>
+      <span class="s">"tsumego"</span>: <span class="n">82.5</span>,
+      <span class="s">"fuseki"</span>:  <span class="n">67.0</span>
+    <span class="k">}</span>,
+    <span class="s">"tsumego_stats"</span>: <span class="k">{</span>
+      <span class="s">"total_submitted"</span>: <span class="n">14</span>,
+      <span class="s">"avg_score"</span>:       <span class="n">8.6</span>
+    <span class="k">}</span>
+  <span class="k">}</span>
+<span class="k">}</span></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── How it works ────────────────────────────────────────────────────────── -->
+<div class="hiw-wrap">
+  <div class="hiw-inner">
+    <div class="section-tag">How it works</div>
+    <h2 class="section-title">Up and running in minutes</h2>
+    <div class="steps">
+      <div class="step fade-up">
+        <div class="step-num">1️⃣</div>
+        <h3>Teacher creates an account</h3>
+        <p>Sign up, add your students by email, and you're ready. No complicated setup, no configuration.</p>
+      </div>
+      <div class="step fade-up">
+        <div class="step-num">2️⃣</div>
+        <h3>Open a session</h3>
+        <p>Start a live lesson, send homework, or schedule a tournament. Students get notified instantly.</p>
+      </div>
+      <div class="step fade-up">
+        <div class="step-num">3️⃣</div>
+        <h3>Students join and learn</h3>
+        <p>From any device — browser, desktop app, or mobile. Everything syncs in real time.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Platforms ──────────────────────────────────────────────────────────── -->
+<section id="platforms">
+  <div class="section-tag">Platforms</div>
+  <h2 class="section-title">One tool, every device</h2>
+  <p class="section-sub">The same experience, wherever you are.</p>
+  <div class="platforms-grid">
+    <div class="plat-card fade-up">
+      <div class="plat-icon">🌐</div>
+      <h3>Web</h3>
+      <p>Access Go Platform from any browser, anywhere in the world. No installation required — just open the link and start teaching.</p>
+      <div class="plat-tag">Early access — June 1, 2026</div>
+    </div>
+    <div class="plat-card fade-up">
+      <div class="plat-icon">🖥️</div>
+      <h3>Desktop App</h3>
+      <p>A native application for teachers — works offline, starts instantly, and gives you a dedicated workspace for your lessons and students.</p>
+      <div class="plat-tag" style="background:rgba(74,158,255,.1);color:var(--blue);border-color:rgba(74,158,255,.2)">Coming soon</div>
+    </div>
+    <div class="plat-card fade-up">
+      <div class="plat-icon">📱</div>
+      <h3>Mobile App</h3>
+      <p>For students on the go — solve tsumego on the train, check standings, join a lesson, and receive push notifications. iOS &amp; Android.</p>
+      <div class="plat-tag" style="background:rgba(74,158,255,.1);color:var(--blue);border-color:rgba(74,158,255,.2)">Coming soon</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Changelog ──────────────────────────────────────────────────────────── -->
+<div class="changelog-wrap" id="changelog">
+  <div class="changelog-inner">
+    <div class="section-tag">Last update</div>
+    <h2 class="section-title">What's new</h2>
+    <div class="cl-list">
+
+      <div class="cl-item fade-up">
+        <div class="cl-dot wip"></div>
+        <div class="cl-date">May 2026 <span class="cl-tag cl-tag-wip">In development</span></div>
+        <div class="cl-title">REST API v1</div>
+        <div class="cl-desc">19 documented endpoints covering students, assignments, sessions, grades, and leaderboard. Bearer token authentication. Generate your key from the teacher dashboard at <a href="#" onclick="comingSoon(event)" style="color:var(--blue)">/teacher/api-keys</a>. Full docs at <a href="#" onclick="comingSoon(event)" style="color:var(--blue)">/api/docs</a>.</div>
+      </div>
+
+      <div class="cl-item fade-up">
+        <div class="cl-dot active"></div>
+        <div class="cl-date">May 2026 <span class="cl-tag cl-tag-done">Done</span></div>
+        <div class="cl-title">Tournaments &amp; League system</div>
+        <div class="cl-desc">McMahon and round-robin tournaments with automatic pairings, standings, SOS tiebreaker, and ELO updates. Full league seasons with multiple groups and promotion/relegation.</div>
+      </div>
+
+      <div class="cl-item fade-up">
+        <div class="cl-dot active"></div>
+        <div class="cl-date">April 2026 <span class="cl-tag cl-tag-done">Done</span></div>
+        <div class="cl-title">Tsumego solving interface</div>
+        <div class="cl-desc">Redesigned homework interface: thumbnail grid → full-screen overlay. Step-by-step solution navigation, keyboard shortcuts, and one-click PDF export of the full problem set.</div>
+      </div>
+
+      <div class="cl-item fade-up">
+        <div class="cl-dot active"></div>
+        <div class="cl-date">March 2026 <span class="cl-tag cl-tag-done">Done</span></div>
+        <div class="cl-title">Course editor &amp; PDF export</div>
+        <div class="cl-desc">Rich multi-section course editor with LaTeX/PDF export for offline distribution. Per-section Q&amp;A between teacher and students.</div>
+      </div>
+
+      <div class="cl-item fade-up">
+        <div class="cl-dot active"></div>
+        <div class="cl-date">February 2026 <span class="cl-tag cl-tag-done">Done</span></div>
+        <div class="cl-title">Live sessions with real-time goban</div>
+        <div class="cl-desc">WebSocket-powered board shared between teacher and students. Annotations, move tree, game mode with clocks, chat, and optional WebRTC video/audio.</div>
+      </div>
+
+      <div class="cl-item fade-up">
+        <div class="cl-dot planned"></div>
+        <div class="cl-date">June 2026 <span class="cl-tag cl-tag-planned">Planned</span></div>
+        <div class="cl-title">Desktop &amp; Mobile apps</div>
+        <div class="cl-desc">Native apps built on Electron (desktop) and Capacitor (iOS/Android) sharing the same codebase as the web platform.</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ── Sustainability ─────────────────────────────────────────────────────── -->
+<div class="sustain-wrap">
+  <div class="sustain-inner">
+    <div>
+      <div class="section-tag">Community &amp; Sustainability</div>
+      <h2 class="section-title">How does Go Platform survive?</h2>
+      <p style="font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:20px;max-width:420px">
+        Go Platform is a <strong style="color:var(--text)">community-maintained, free-to-use service</strong>.
+        You don't install anything — you just create an account and start teaching.
+        The platform is hosted and kept online by the people who use it.
+      </p>
+      <p style="font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:20px;max-width:420px">
+        There are no ads, no subscriptions, no data sold — ever.
+        Think Wikipedia: one shared place, free for everyone,
+        kept alive by those who believe in it.
+      </p>
+      <p style="font-size:14px;color:var(--text2);line-height:1.7;max-width:420px">
+        Those who want to go further can support the project voluntarily
+        through <strong style="color:var(--text)">GitHub Sponsors</strong> or
+        <strong style="color:var(--text)">Open Collective</strong>
+        — community contributions are what keep the servers running and the project growing.
+      </p>
+      <div class="sustain-pills">
+        <div class="s-pill"><span class="s-pill-icon">🌍</span>Community-hosted service</div>
+        <div class="s-pill"><span class="s-pill-icon">🔓</span>100% open source</div>
+        <div class="s-pill"><span class="s-pill-icon">🚫</span>No ads, no tracking</div>
+        <div class="s-pill"><span class="s-pill-icon">♾️</span>No usage limits</div>
+      </div>
+    </div>
+    <div class="sustain-cards">
+      <div class="s-card fade-up">
+        <div class="s-card-icon">💻</div>
+        <h4>Contribute code</h4>
+        <p>New features, bug fixes, refactors — open a PR on GitHub. Every contribution makes the platform better for everyone.</p>
+      </div>
+      <div class="s-card fade-up">
+        <div class="s-card-icon">📣</div>
+        <h4>Spread the word</h4>
+        <p>Tell other Go teachers. Share in your club, on forums, on social media. More users = more community = a healthier project.</p>
+      </div>
+      <div class="s-card fade-up">
+        <div class="s-card-icon">❤️</div>
+        <h4>Support voluntarily</h4>
+        <p>GitHub Sponsors or Open Collective — voluntary donations help cover server costs and give contributors time to improve the platform.</p>
+      </div>
+      <div class="s-card fade-up">
+        <div class="s-card-icon">🔗</div>
+        <h4>Integrate via API</h4>
+        <p>Connect your school platform or LMS to Go Platform. Growing the ecosystem extends the reach of the project.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Footer ─────────────────────────────────────────────────────────────── -->
+<footer>
+  <div class="footer-logo">&#9823; Go Platform</div>
+  <div class="footer-links">
+    <a href="#features">Features</a>
+    <a href="#usage">Teachers</a>
+    <a href="#api">API</a>
+    <a href="#" onclick="comingSoon(event)">API Docs</a>
+    <a href="#platforms">Platforms</a>
+    <a href="#" onclick="comingSoon(event)">Sign in</a>
+  </div>
+  <div class="footer-copy">Free · Open Source · Built for the Go community</div>
+</footer>
+
+<div id="cs-toast" class="cs-toast">🗓️ Available June 1, 2026</div>
+
+<!-- ── Feature Detail Modal ───────────────────────────────────────────────── -->
+<div id="dm-bg" class="dm-bg" onclick="closeDmBg(event)">
+  <div class="dm-box">
+    <button class="dm-close" onclick="closeDetail()">✕</button>
+    <h2><span id="dm-icon"></span><span id="dm-title"></span></h2>
+    <p class="dm-desc" id="dm-desc"></p>
+    <ul class="dm-points" id="dm-points"></ul>
+  </div>
+</div>
+
+<script>
+// ── Animated Goban ───────────────────────────────────────────────────────────
+(function() {
+  const canvas = document.getElementById('hero-canvas');
+  const ctx    = canvas.getContext('2d');
+  const SIZE   = 9;
+  const W      = canvas.width;
+  const PAD    = W * 0.09;
+  const CELL   = (W - 2*PAD) / (SIZE-1);
+  const SEQUENCE = [
+    {c:4,r:4,col:'B'},{c:2,r:2,col:'W'},{c:6,r:2,col:'B'},
+    {c:2,r:6,col:'W'},{c:6,r:6,col:'B'},{c:4,r:2,col:'W'},
+    {c:4,r:6,col:'B'},{c:2,r:4,col:'W'},{c:6,r:4,col:'B'},
+    {c:3,r:3,col:'W'},{c:5,r:3,col:'B'},{c:3,r:5,col:'W'},
+    {c:5,r:5,col:'B'},{c:1,r:1,col:'W'},{c:7,r:1,col:'B'},
+    {c:1,r:7,col:'W'},{c:7,r:7,col:'B'},{c:4,r:1,col:'W'},
+    {c:4,r:7,col:'B'},{c:1,r:4,col:'W'},
+  ];
+  let stones=[], current=0, alpha=1;
+  function drawBoard(){
+    ctx.clearRect(0,0,W,W);
+    const grad=ctx.createLinearGradient(0,0,W,W);
+    grad.addColorStop(0,'#C8A84B'); grad.addColorStop(1,'#B8963E');
+    ctx.fillStyle=grad; ctx.roundRect(0,0,W,W,16); ctx.fill();
+    ctx.strokeStyle='rgba(90,60,20,.5)'; ctx.lineWidth=1;
+    for(let i=0;i<SIZE;i++){
+      const x=PAD+i*CELL,y=PAD+i*CELL;
+      ctx.beginPath(); ctx.moveTo(x,PAD); ctx.lineTo(x,PAD+(SIZE-1)*CELL); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(PAD,y); ctx.lineTo(PAD+(SIZE-1)*CELL,y); ctx.stroke();
+    }
+    ctx.fillStyle='rgba(90,60,20,.5)';
+    [[2,2],[2,6],[4,4],[6,2],[6,6]].forEach(([hc,hr])=>{
+      ctx.beginPath(); ctx.arc(PAD+hc*CELL,PAD+hr*CELL,3.5,0,Math.PI*2); ctx.fill();
+    });
+    ctx.globalAlpha=alpha;
+    stones.forEach((s,i)=>{
+      const cx=PAD+s.c*CELL,cy=PAD+s.r*CELL,r=CELL*.44,isLast=(i===stones.length-1);
+      ctx.shadowColor='rgba(0,0,0,.4)'; ctx.shadowBlur=8; ctx.shadowOffsetY=2;
+      const sg=ctx.createRadialGradient(cx-r*.25,cy-r*.25,r*.05,cx,cy,r);
+      if(s.col==='B'){sg.addColorStop(0,'#555'); sg.addColorStop(1,'#111');}
+      else{sg.addColorStop(0,'#fff'); sg.addColorStop(1,'#ccc');}
+      ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
+      ctx.fillStyle=sg; ctx.fill();
+      ctx.shadowColor='transparent'; ctx.shadowBlur=0; ctx.shadowOffsetY=0;
+      if(isLast){
+        ctx.beginPath(); ctx.arc(cx,cy,r*.28,0,Math.PI*2);
+        ctx.fillStyle=s.col==='B'?'rgba(255,255,255,.7)':'rgba(0,0,0,.5)'; ctx.fill();
+      }
+    });
+    ctx.globalAlpha=1;
+  }
+  function addNext(){
+    if(current<SEQUENCE.length){ stones.push(SEQUENCE[current++]); drawBoard(); setTimeout(addNext,600); }
+    else setTimeout(startFade,2500);
+  }
+  function startFade(){
+    (function fo(){ if(alpha>0){ alpha=Math.max(0,alpha-.04); drawBoard(); requestAnimationFrame(fo); }
+      else{ stones=[]; current=0; alpha=1; drawBoard(); setTimeout(addNext,400); } })();
+  }
+  drawBoard(); setTimeout(addNext,800);
+})();
+
+// ── Coming soon handler ──────────────────────────────────────────────────────
+function comingSoon(e) {
+  e.preventDefault();
+  const t = document.getElementById('cs-toast');
+  t.style.display = 'block';
+  clearTimeout(window._cst);
+  window._cst = setTimeout(() => { t.style.display = 'none'; }, 2500);
+  return false;
+}
+
+// ── Early Bird Banner ────────────────────────────────────────────────────────
+function dismissBanner(){
+  const b = document.getElementById('early-banner');
+  b.style.display = 'none';
+  document.getElementById('main-nav').classList.add('no-banner');
+  document.documentElement.style.setProperty('--eb-h','0px');
+  localStorage.setItem('eb_dismissed','1');
+}
+(function(){
+  if(localStorage.getItem('eb_dismissed')){
+    const b=document.getElementById('early-banner');
+    if(b){ b.style.display='none'; document.getElementById('main-nav').classList.add('no-banner');
+           document.documentElement.style.setProperty('--eb-h','0px'); }
+  }
+})();
+
+// ── Feature tabs ─────────────────────────────────────────────────────────────
+function switchTab(panel, btn){
+  document.querySelectorAll('.feat-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+panel).classList.add('active');
+  btn.classList.add('active');
+  observeFadeUps();
+}
+
+// ── Feature Detail Modal ─────────────────────────────────────────────────────
+const FEAT = {
+  't-lessons': {
+    icon:'📡', title:'Live Lessons',
+    desc:'Open a shared session and all your linked students can join instantly from their browser.',
+    points:[
+      'Open a new session from your dashboard with one click — choose 9×9, 13×13, or 19×19',
+      'All your students receive an instant real-time notification',
+      'Everyone shares the same goban — stone placements appear live for every participant',
+      'Integrated chat panel visible to teacher and students during the session',
+      'Sessions are automatically saved to your history for later review',
+      'Multiple students can join the same session simultaneously',
+    ]
+  },
+  't-annotations': {
+    icon:'✏️', title:'Board Annotations',
+    desc:'Annotate the board during live sessions with a full set of professional tools.',
+    points:[
+      '6 marker types: triangle, square, circle, cross, letter (A–Z), and free-draw paint',
+      'Place markers on any intersection or line segment of the goban',
+      'Forward / backward move tree navigation — step through any game variation',
+      'Load an SGF file to replay and annotate a professional game with your students',
+      'All annotations are broadcast live and visible to every participant in the session',
+      'Available in both demonstration and game modes',
+    ]
+  },
+  't-games': {
+    icon:'⚔️', title:'Live Games',
+    desc:'Challenge a student to a real game inside a session with full tournament-level configuration.',
+    points:[
+      'Send a game request to any of your linked students directly from the dashboard',
+      'Configure ruleset: Japanese, Chinese, Korean, or AGA',
+      'Set komi, handicap (0–9 stones), and which color you play',
+      'Clock types: no clock, absolute time, Fischer, Byo-yomi, Canadian, or per-move',
+      'Turns alternate with full capture tracking and end-game territory counting',
+      'Completed games are stored in your session history for future review',
+    ]
+  },
+  't-polls': {
+    icon:'📊', title:'Instant Polls',
+    desc:'Run interactive polls during live sessions without interrupting the lesson flow.',
+    points:[
+      'Launch a poll instantly during any live session',
+      'Question types: free text, True/False, multiple choice (up to 6 options)',
+      'Optional countdown timer from 10 seconds to 5 minutes',
+      'Choose to hide results until you reveal them — ideal for "where should Black play?" questions',
+      'Students answer on their own screen; aggregate results update in real time',
+      'Poll results are saved as part of the session record',
+    ]
+  },
+  't-tsumego': {
+    icon:'⭕', title:'Tsumego Homework',
+    desc:'Assign custom tsumego sets to individual students and grade their submissions.',
+    points:[
+      'Browse your SGF database filtered by difficulty level and board size (9×9 to 19×19)',
+      'Select individual problems or batch-select by criteria',
+      'Give the assignment a title, description, window in days, and optional deadline',
+      'Send to a student — they receive an instant notification',
+      'When the student submits, you see their answer per problem: found / missed / hard',
+      'Grade the submission with a numeric score and written teacher feedback',
+      'Export any assignment as a printable PDF (requires pdflatex)',
+    ]
+  },
+  't-courses': {
+    icon:'📚', title:'Written Lessons',
+    desc:'Create structured course documents and share them with your students.',
+    points:[
+      'Multi-section editor: each section has a title, rich text, and optional diagram',
+      'Organize by category: fuseki, chuban, yose, tsumego, tesuji, other',
+      'Publish to make the lesson visible in your students\' dashboard',
+      'Export any lesson to LaTeX / PDF for printing or offline distribution',
+      'Students can ask a question on any section — you receive and reply in-platform',
+      'All lessons remain accessible to students as long as they are linked to your account',
+    ]
+  },
+  't-tournaments': {
+    icon:'🏆', title:'Tournaments & Leagues',
+    desc:'Organize structured competitions between your students.',
+    points:[
+      'Create a tournament with McMahon or round-robin pairing system',
+      'The platform generates pairings automatically and updates standings after each result',
+      'SOS (Sum of Opponents\' Scores) tiebreaker support',
+      'ELO ratings update automatically after each completed tournament game',
+      'Full league season system with multiple groups (A, B, C…)',
+      'Promotion and relegation between groups based on final standings',
+      'Standalone game requests can also be created between any two students',
+    ]
+  },
+  't-groups': {
+    icon:'👥', title:'Student Groups',
+    desc:'Organize students into groups for collective sessions and targeted assignments.',
+    points:[
+      'Create named groups (e.g. "Beginners", "Club A") from your dashboard',
+      'Add and remove students from groups at any time',
+      'Launch a group demonstration session in one click — all group members are notified',
+      'Useful for organizing students by level, class, or club',
+    ]
+  },
+  't-progress': {
+    icon:'📈', title:'Progress Tracking',
+    desc:'Get a complete picture of each student\'s development over time.',
+    points:[
+      'View each student\'s ELO rating as a line chart over weeks and months',
+      'Radar chart showing scores by category: fuseki, chuban, yose, tsumego, tesuji',
+      'Timeline of all tsumego submissions with individual scores',
+      'Manually enter evaluation entries per category at any time',
+      'Identify strengths and areas that need work at a glance',
+    ]
+  },
+  't-calendar': {
+    icon:'📅', title:'Shared Calendar',
+    desc:'Manage your schedule and communicate availability to your students.',
+    points:[
+      'Schedule upcoming lessons and events visible to your students',
+      'Publish your availability so students know when to expect a session',
+      'Handle reschedule requests from the same interface',
+      'Color-coded events by type: lesson, tournament, game, other',
+    ]
+  },
+  's-join': {
+    icon:'▶️', title:'Join a Lesson',
+    desc:'Connect to your teacher\'s live session instantly, from any device.',
+    points:[
+      'Receive a real-time browser notification the moment your teacher opens a session',
+      'Join with one click — the board is already live when you arrive',
+      'See every stone placed and every annotation added by your teacher in real time',
+      'Chat with your teacher via the integrated side panel',
+      'Works on any modern browser — desktop, tablet, or mobile',
+      'No installation or plugin required beyond your initial registration',
+    ]
+  },
+  's-tsumego': {
+    icon:'⭕', title:'Solve Tsumego',
+    desc:'Work through your assigned problems at your own pace, then submit to your teacher.',
+    points:[
+      'View all assigned problems as a grid of thumbnails — click any to open it',
+      'Full-screen board overlay with the problem displayed at natural size',
+      'Navigate the solution step by step using arrow keys or on-screen buttons',
+      'Mark each problem: ✓ found it · ✗ missed it · ? not sure / want to review',
+      'Once all problems are marked, submit your work with one click',
+      'Download the entire assignment as a PDF for offline study',
+    ]
+  },
+  's-courses': {
+    icon:'📚', title:'Browse Lessons',
+    desc:'Access all course materials your teacher has shared with you.',
+    points:[
+      'All published lessons from your teacher appear in your student dashboard',
+      'Read them online in a clean formatted view, organized by category',
+      'Download any lesson as a PDF for offline reading or printing',
+      'Ask a question on any section — your teacher receives it and can reply in-platform',
+      'Lessons remain accessible as long as you are linked to your teacher',
+    ]
+  },
+  's-elo': {
+    icon:'📈', title:'Track Your ELO',
+    desc:'Follow your progression with objective data across all dimensions of the game.',
+    points:[
+      'Your ELO rating updates automatically after every game played inside the platform',
+      'View your full ELO history as a line chart — track improvements over months',
+      'Radar chart showing your scores by category: fuseki, chuban, yose, tsumego, tesuji',
+      'Identify your strongest areas and what to work on next',
+    ]
+  },
+  's-compete': {
+    icon:'🏆', title:'Compete',
+    desc:'Take part in tournaments and leagues organized by your teacher.',
+    points:[
+      'Accept a tournament invitation from your teacher\'s notification',
+      'View the bracket, pairing schedule, and standings in real time',
+      'Your ELO updates after each tournament game',
+      'Access your full game history inside the tournament',
+      'League seasons track your record across multiple rounds',
+    ]
+  },
+  't-group-hw': {
+    icon:'📋', title:'Group Homework & Live Collection',
+    desc:'Assign a problem set to an entire group and collect answers live during a session — no manual distribution, no waiting.',
+    points:[
+      'Send a tsumego set or written exercise to your entire group with a single action — no need to assign individually',
+      'All group members receive the notification simultaneously',
+      'Open a live session and activate the collection panel — a real-time view of incoming submissions',
+      'See each student\'s answers appear as they submit: problem by problem, found / missed / hard',
+      'Results aggregate on the teacher\'s screen without any page refresh — ideal for classroom or online group lessons',
+      'Combine with the board annotation tool to review missed problems immediately with the whole group',
+      'Export collected results as a summary report once the session closes',
+    ]
+  },
+  's-notifs': {
+    icon:'🔔', title:'Live Notifications',
+    desc:'Never miss a lesson, assignment, or game request.',
+    points:[
+      'Instant browser notification when your teacher opens a live session',
+      'Notification when you receive a new tsumego assignment',
+      'Notification when your teacher sends you a game request',
+      'Notification badge on your dashboard navigation for unread items',
+      'All powered by WebSocket — no page refresh needed',
+    ]
+  },
+};
+
+function openDetail(key){
+  const d = FEAT[key]; if(!d) return;
+  document.getElementById('dm-icon').textContent  = d.icon + ' ';
+  document.getElementById('dm-title').textContent = d.title;
+  document.getElementById('dm-desc').textContent  = d.desc;
+  const ul = document.getElementById('dm-points');
+  ul.innerHTML = '';
+  d.points.forEach(p => {
+    const li = document.createElement('li');
+    li.textContent = p;
+    ul.appendChild(li);
+  });
+  document.getElementById('dm-bg').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeDetail(){
+  document.getElementById('dm-bg').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function closeDmBg(e){ if(e.target === document.getElementById('dm-bg')) closeDetail(); }
+document.addEventListener('keydown', e => { if(e.key === 'Escape') closeDetail(); });
+
+// ── Scroll animations ─────────────────────────────────────────────────────────
+function observeFadeUps(){
+  const obs = new IntersectionObserver((entries)=>{
+    entries.forEach((e,i)=>{
+      if(e.isIntersecting){ setTimeout(()=>e.target.classList.add('visible'),i*80); obs.unobserve(e.target); }
+    });
+  },{threshold:.1});
+  document.querySelectorAll('.fade-up:not(.visible)').forEach(el=>obs.observe(el));
+}
+observeFadeUps();
+
+// ── Nav scroll effect ─────────────────────────────────────────────────────────
+window.addEventListener('scroll',()=>{
+  document.querySelector('nav').style.borderBottomColor =
+    window.scrollY > 40 ? 'var(--border2)' : 'var(--border)';
+});
+</script>
+</body>
+</html>
